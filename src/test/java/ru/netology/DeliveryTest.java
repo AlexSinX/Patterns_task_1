@@ -22,7 +22,7 @@ public class DeliveryTest {
         String firstDate = DataGenerator.generateDate(3);
         String secondDate = DataGenerator.generateDate(7);
 
-        // Планирование
+        // Планирование первой встречи
         $("[data-test-id=city] input").setValue(userInfo.getCity());
         $("[data-test-id=date] input").doubleClick().sendKeys(org.openqa.selenium.Keys.BACK_SPACE);
         $("[data-test-id=date] input").setValue(firstDate);
@@ -32,16 +32,25 @@ public class DeliveryTest {
         $$("button").findBy(Condition.exactText("Забронировать")).click();
 
         Thread.sleep(2000);
+        // Проверка уведомления о первой встрече
+        $("[data-test-id=success-notification]").shouldBe(Condition.visible);
         $("[data-test-id=success-notification] .notification__content")
                 .shouldHave(Condition.exactText("Встреча успешно запланирована на " + firstDate));
-        $("[data-test-id=success-notification] .notification__closer").click();
 
-        // Перепланирование
+        // Перепланирование на новую дату
         $("[data-test-id=date] input").doubleClick().sendKeys(org.openqa.selenium.Keys.BACK_SPACE);
         $("[data-test-id=date] input").setValue(secondDate);
         $$("button").findBy(Condition.exactText("Забронировать")).click();
 
+        Thread.sleep(1500);
+        // Диалог подтверждения перепланирования
+        $(withText("У вас уже запланирована встреча на другую дату. Перепланировать?"))
+                .shouldBe(Condition.visible);
+        $$("button").findBy(Condition.exactText("Перепланировать")).click();
+
         Thread.sleep(2000);
+        // Проверка уведомления после перепланирования
+        $("[data-test-id=success-notification]").shouldBe(Condition.visible);
         $("[data-test-id=success-notification] .notification__content")
                 .shouldHave(Condition.exactText("Встреча успешно запланирована на " + secondDate));
     }
